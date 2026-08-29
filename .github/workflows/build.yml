@@ -92,7 +92,7 @@ jobs:
           git clone --depth=1 https://github.com/ztc1997/AnyKernel3.git ak3
           cp Image ak3/Image
           cat > ak3/anykernel.sh << 'EOF'
-### AnyKernel3 Ramdisk Mod Script
+          ### AnyKernel3 Ramdisk Mod Script
           ## osm0sis @ xda-developers
           properties() { '
           kernel.string=GKI 5.10 (pearl) KernelSU+SUSFS
