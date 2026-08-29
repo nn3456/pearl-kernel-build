@@ -1,4 +1,4 @@
-name: Build pearl kernel (5.10.240 + KSU + SUSFS v2.2.0)
+name: Build pearl kernel (5.10.240 + SukiSU + SUSFS)
 
 on:
   workflow_dispatch:
@@ -24,10 +24,10 @@ jobs:
           git clone --depth=1 -b android12-5.10-2025-09 --recurse-submodules \
             https://github.com/ztc1997/android_gki_kernel_5.10_common.git kernel
 
-      - name: Integrate KernelSU (latest)
+      - name: Integrate KernelSU (SukiSU-Ultra latest)
         run: |
           cd kernel
-          curl -LSs https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh | bash -
+          curl -LSs https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh | bash -
           (cd KernelSU && echo "KSU version: $(git describe --tags 2>/dev/null || git rev-parse --short HEAD)")
 
       - name: Fetch SUSFS v2.2.0 patches
@@ -95,7 +95,7 @@ jobs:
           ### AnyKernel3 Ramdisk Mod Script
           ## osm0sis @ xda-developers
           properties() { '
-          kernel.string=GKI 5.10 (pearl) KernelSU+SUSFS
+          kernel.string=GKI 5.10 (pearl) SukiSU+SUSFS
           do.devicecheck=0
           do.modules=0
           do.systemless=1
@@ -117,7 +117,6 @@ jobs:
           write_boot;
           EOF
           (cd ak3 && zip -r9 ../Kernel-pearl-5.10.240-KSU-SUSFS.zip . -x '.git/*')
-          (cd susfs/ksu_module_susfs && zip -r9 ../../ksu_module_susfs.zip .)
           ls -lh Kernel-pearl-5.10.240-KSU-SUSFS.zip ksu_module_susfs.zip
 
       - name: Push Image to built branch
@@ -138,6 +137,5 @@ jobs:
           name: pearl-kernel-ksu-susfs
           path: |
             Kernel-pearl-5.10.240-KSU-SUSFS.zip
-            ksu_module_susfs.zip
           if-no-files-found: error
           retention-days: 30
