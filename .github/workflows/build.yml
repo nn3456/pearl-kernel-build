@@ -2,9 +2,11 @@ name: Build pearl kernel (5.10.240 + KSU + SUSFS v2.2.0)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-kernel:
@@ -90,8 +92,10 @@ jobs:
           git clone --depth=1 https://github.com/ztc1997/AnyKernel3.git ak3
           cp Image ak3/Image
           cat > ak3/anykernel.sh << 'EOF'
-          ### AnyKernel3 Ramdisk Mod Script
-          kernel.string=GKI 5.10 (pearl) KernelSU+SUSFS v2.2.0
+### AnyKernel3 Ramdisk Mod Script
+          ## osm0sis @ xda-developers
+          properties() { '
+          kernel.string=GKI 5.10 (pearl) KernelSU+SUSFS
           do.devicecheck=0
           do.modules=0
           do.systemless=1
@@ -99,9 +103,10 @@ jobs:
           do.cleanuponabort=0
           supported.versions=
           supported.patchlevels=
+          '; }
           attributes() {
-            set_perm_recursive 0 0 755 644 $ramdisk/*;
-            set_perm_recursive 0 0 750 750 $ramdisk/init* $ramdisk/sbin;
+          set_perm_recursive 0 0 755 644 $ramdisk/*;
+          set_perm_recursive 0 0 750 750 $ramdisk/init* $ramdisk/sbin;
           }
           block=boot;
           is_slot_device=1;
@@ -114,6 +119,18 @@ jobs:
           (cd ak3 && zip -r9 ../Kernel-pearl-5.10.240-KSU-SUSFS.zip . -x '.git/*')
           (cd susfs/ksu_module_susfs && zip -r9 ../../ksu_module_susfs.zip .)
           ls -lh Kernel-pearl-5.10.240-KSU-SUSFS.zip ksu_module_susfs.zip
+
+      - name: Push Image to built branch
+        run: |
+          mkdir pushdir && cd pushdir
+          git init -q -b built
+          cp ../Image .
+          git config user.name "pearl-bot"
+          git config user.email "bot@pearl.local"
+          git add Image
+          git commit -q -m "built image $(date -u +%Y%m%d%H%M)"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/nn3456/pearl-kernel-build.git" built
+          echo "Image pushed to built branch"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
