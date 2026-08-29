@@ -24,10 +24,10 @@ jobs:
           git clone --depth=1 -b android12-5.10-2025-09 --recurse-submodules \
             https://github.com/ztc1997/android_gki_kernel_5.10_common.git kernel
 
-      - name: Integrate KernelSU (SukiSU-Ultra latest)
+      - name: Integrate KernelSU (SukiSU-Ultra susfs_new branch)
         run: |
           cd kernel
-          curl -LSs https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh | bash -
+          curl -LSs https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh | bash -s susfs_new
           (cd KernelSU && echo "KSU version: $(git describe --tags 2>/dev/null || git rev-parse --short HEAD)")
 
       - name: Fetch SUSFS v2.2.0 patches
@@ -39,13 +39,9 @@ jobs:
 
       - name: Apply SUSFS patches (10 -> KernelSU, 50 -> kernel)
         run: |
-          cp susfs/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch kernel/KernelSU/
           cp susfs/kernel_patches/fs/susfs.c kernel/fs/
           cp susfs/kernel_patches/include/linux/susfs.h kernel/include/linux/
           cp susfs/kernel_patches/include/linux/susfs_def.h kernel/include/linux/
-          cd kernel/KernelSU
-          patch -p1 -s < 10_enable_susfs_for_ksu.patch
-          cd ../..
           cp susfs/kernel_patches/50_add_susfs_in_gki-android12-5.10.patch kernel/
           cd kernel
           patch -p1 -s < 50_add_susfs_in_gki-android12-5.10.patch
