@@ -1,4 +1,4 @@
-name: Build pearl kernel (5.10.240 + SukiSU + SUSFS)
+name: Build pearl kernel (5.10.240 + KSU + SUSFS v2.2.0)
 
 on:
   workflow_dispatch:
@@ -24,10 +24,10 @@ jobs:
           git clone --depth=1 -b android12-5.10-2025-09 --recurse-submodules \
             https://github.com/ztc1997/android_gki_kernel_5.10_common.git kernel
 
-      - name: Integrate KernelSU (SukiSU-Ultra latest)
+      - name: Integrate KernelSU (latest)
         run: |
           cd kernel
-          curl -LSs https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh | bash -
+          curl -LSs https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh | bash -s main
           (cd KernelSU && echo "KSU version: $(git describe --tags 2>/dev/null || git rev-parse --short HEAD)")
 
       - name: Fetch SUSFS v2.2.0 patches
@@ -95,7 +95,7 @@ jobs:
           ### AnyKernel3 Ramdisk Mod Script
           ## osm0sis @ xda-developers
           properties() { '
-          kernel.string=GKI 5.10 (pearl) SukiSU+SUSFS
+          kernel.string=GKI 5.10 (pearl) KernelSU+SUSFS
           do.devicecheck=0
           do.modules=0
           do.systemless=1
@@ -117,12 +117,17 @@ jobs:
           write_boot;
           EOF
           (cd ak3 && zip -r9 ../Kernel-pearl-5.10.240-KSU-SUSFS.zip . -x '.git/*')
+<<<<<<< HEAD
           ls -lh Kernel-pearl-5.10.240-KSU-SUSFS.zip
 
       - name: Free disk space
         run: |
           rm -rf kernel ak3 susfs toolchain-clang pushdir
           df -h /
+=======
+          (cd susfs/ksu_module_susfs && zip -r9 ../../ksu_module_susfs.zip .)
+          ls -lh Kernel-pearl-5.10.240-KSU-SUSFS.zip ksu_module_susfs.zip
+>>>>>>> parent of 45c7234 (feat: KSU 源切换为 SukiSU-Ultra; 移除空壳模块打包)
 
       - name: Push Image to built branch
         continue-on-error: true
@@ -142,5 +147,6 @@ jobs:
           name: pearl-kernel-ksu-susfs
           path: |
             Kernel-pearl-5.10.240-KSU-SUSFS.zip
+            ksu_module_susfs.zip
           if-no-files-found: error
           retention-days: 30
