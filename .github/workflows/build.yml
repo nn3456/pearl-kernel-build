@@ -117,17 +117,8 @@ jobs:
           write_boot;
           EOF
           (cd ak3 && zip -r9 ../Kernel-pearl-5.10.240-KSU-SUSFS.zip . -x '.git/*')
-<<<<<<< HEAD
-          ls -lh Kernel-pearl-5.10.240-KSU-SUSFS.zip
-
-      - name: Free disk space
-        run: |
-          rm -rf kernel ak3 susfs toolchain-clang pushdir
-          df -h /
-=======
           (cd susfs/ksu_module_susfs && zip -r9 ../../ksu_module_susfs.zip .)
           ls -lh Kernel-pearl-5.10.240-KSU-SUSFS.zip ksu_module_susfs.zip
->>>>>>> parent of 45c7234 (feat: KSU 源切换为 SukiSU-Ultra; 移除空壳模块打包)
 
       - name: Push Image to built branch
         continue-on-error: true
@@ -138,8 +129,14 @@ jobs:
           git config user.name "pearl-bot"
           git config user.email "bot@pearl.local"
           git add Image
-          git commit -q -m "SukiSU image $(date -u +%Y%m%d%H%M)"
+          git commit -q -m "built image $(date -u +%Y%m%d%H%M)"
           git push -q --force "https://x-access-token:${{ github.token }}@github.com/nn3456/pearl-kernel-build.git" built
+          echo "Image pushed to built branch"
+
+      - name: Free disk space
+        run: |
+          rm -rf kernel ak3 susfs toolchain-clang pushdir
+          df -h /
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
